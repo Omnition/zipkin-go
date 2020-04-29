@@ -290,3 +290,39 @@ func TestSpanUnmarshalScientificNotationTimestamp(t *testing.T) {
 		}
 	})
 }
+
+func TestSpanUnmarshalStringTimestamp(t *testing.T) {
+	t.Run("Validate span timestamp", func(t *testing.T) {
+		var (
+			err  error
+			span SpanModel
+			b    = []byte(`{"traceId":"1", "id":"1", "timestamp":"1582662767960314"}`)
+		)
+
+		if err = json.Unmarshal(b, &span); err != nil {
+			t.Errorf("Unmarshal should have worked without error, have: %+v", span)
+		}
+
+		expected := time.Unix(1582662767, 960314000).UnixNano()
+		if span.Timestamp.UnixNano() != expected {
+			t.Errorf("Invalid unmarshaled timestamp, want: %v, have: %+v", expected, span.Timestamp.UnixNano())
+		}
+	})
+
+	t.Run("Validate span duration", func(t *testing.T) {
+		var (
+			err  error
+			span SpanModel
+			b    = []byte(`{"traceId":"1", "id":"1", "duration":"2245"}`)
+		)
+
+		if err = json.Unmarshal(b, &span); err != nil {
+			t.Errorf("Unmarshal should have worked without error, have: %+v", span)
+		}
+
+		expected := 2245 * time.Microsecond
+		if span.Duration != expected {
+			t.Errorf("Invalid unmarshaled duration, want: %v, have: %+v", span.Duration, expected)
+		}
+	})
+}
